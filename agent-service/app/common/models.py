@@ -20,14 +20,14 @@ class Base(DeclarativeBase):
 # 通用的时间戳【混入类】，这样其它数据模型不用重复定义时间相关字段
 class CreateAtMixin:
     # func.now() 会让数据库在插入时自动生成服务器时间（如 PostgreSQL 的 NOW()）
-    create_at: Mapped[datetime] = mapped_column(
+    created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True),
         server_default=func.now(),
     )
 
 class UpdateAtMixin:
     # onupdate=func.now() 会在每次数据行被 UPDATE 时，由 SQLAlchemy 自动更新该字段
-    update_at: Mapped[datetime] = mapped_column(
+    updated_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True),
         server_default=func.now(),
         onupdate=func.now(),

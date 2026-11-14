@@ -7,7 +7,7 @@ from app.common.models import Base,CreateAtMixin,UpdateAtMixin
 class Product(Base, CreateAtMixin, UpdateAtMixin):
     """ 保险产品 """
 
-    __tablename__ = "product"
+    __tablename__ = "products"
 
     id: Mapped[int] = mapped_column(BigInteger, primary_key=True)
     name: Mapped[str] = mapped_column(String(200))

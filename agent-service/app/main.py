@@ -33,6 +33,10 @@ app = FastAPI(
     lifespan=lifespan
 )
 
+# 挂载路由
+from app.modules.product.router import router as product_router
+app.include_router(product_router)
+
 # 接口测试，健康测试
 @app.get("/health", summary="健康检测接口")
 async def health() -> dict[str, str]:
