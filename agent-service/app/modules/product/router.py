@@ -9,12 +9,15 @@ router = APIRouter(
     prefix="/api/v1/products",
     tags=["产品管理的相关接口"],
 )
+
+def get_product_service(session: AsyncSession = Depends(get_session)):
+    service = ProductService(session)
+    yield service
+
 @router.get("", response_model=list[ProductResponse])
 async def list_products(
         category: str|None = None,
-        session: AsyncSession = Depends(get_session),
+        service: ProductService = Depends(get_product_service),
 ) -> list[ProductResponse]:
-    # 1、创建service
-    service = ProductService(session)
     # 2、执行查询
     return await service.list_products(category)
