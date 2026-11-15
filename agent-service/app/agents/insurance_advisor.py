@@ -1,6 +1,8 @@
 from langchain.agents import create_agent
 from langchain.chat_models import init_chat_model
 from langgraph.checkpoint.postgres.aio import AsyncPostgresSaver
+from langgraph.graph.state import CompiledStateGraph
+
 from app.core.logging import get_logger
 
 logger = get_logger(__name__)
@@ -15,7 +17,7 @@ SYSTEM_PROMPT = """
 """
 
 # agent在整个系统中，只初始化一次
-async def init_insurance_agent(checkpointer: AsyncPostgresSaver):
+async def init_insurance_agent(checkpointer: AsyncPostgresSaver) -> CompiledStateGraph:
     # 初始化模型
     model = init_chat_model(
         model=settings.llm.chat_model,

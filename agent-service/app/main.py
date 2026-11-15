@@ -25,8 +25,8 @@ async def lifespan(app: FastAPI):
         await check_database()
         # 2、初始Checkpointer
         checkpointer = await init_checkpointer()
-        # 3、初始化agent
-        agent = await init_insurance_agent(checkpointer)
+        # 3、初始化agent，并将其保存在FashAPI的全局State中，一切进入FastAPI的请求都共享这个State
+        app.state.agent = await init_insurance_agent(checkpointer)
         yield
     finally:
         # 关闭
@@ -59,9 +59,11 @@ def handle_exception(request: Request, exc: ApplicationError):
 
 # 挂载路由
 from app.modules.product.router import router as product_router
-from app.modules.chat_threads.router import router as chat_thread
+from app.modules.chat_threads.router import router as chat_threads_thread
+from app.modules.chat.router import router as chat_router
+app.include_router(chat_router)
+app.include_router(chat_threads_thread)
 app.include_router(product_router)
-app.include_router(chat_thread)
 
 # 接口测试，健康测试
 @app.get("/health", summary="健康检测接口")
