@@ -23,3 +23,12 @@ class ChatThreadRepository:
         )
         # 2、返回查询结果
         return result.all()
+
+    # 重命名会话
+    async def required_owner(self, user_id:int, id: str) -> ChatThreads:
+        """ 校验指定会话是否属于指定用户 """
+        result = await self.session.scalar(
+            select(ChatThreads)
+            .where(ChatThreads.user_id == user_id, ChatThreads.id == id)
+        )
+        return result

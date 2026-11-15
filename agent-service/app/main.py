@@ -1,8 +1,8 @@
 from contextlib import asynccontextmanager
 
 import uvicorn
-from fastapi import FastAPI
-
+from fastapi import FastAPI,Request
+from fastapi.responses import JSONResponse
 from app.core.config import settings
 from app.core.logging import configure_logging,get_logger
 
@@ -32,6 +32,19 @@ app = FastAPI(
     debug=settings.app.debug,
     lifespan=lifespan
 )
+
+# 统一异常处理
+from app.modules.chat_threads.exceptions import ChatThreadNotFound
+@app.exception_handler(ChatThreadNotFound)
+def handle_exception(request: Request, exc: Exception):
+    logger.error(f"处理异常，请求路径：{request.url}，异常消息：{exc}")
+    return JSONResponse(
+        status_code= 400, # http状态码
+        content={
+            "code": "CHAT_THREAD_NOT_FOUND",    # 错误码
+            "message": "会话不存在或者不属于当前用户" # 错误消息
+        }
+    )
 
 # 挂载路由
 from app.modules.product.router import router as product_router

@@ -31,3 +31,13 @@ async def list_by_user(
         service: ChatThreadsService = Depends(get_service),
 ) -> list[ChatThreadsResponse]:
     return await service.list_by_user(user_id = user_id)
+
+@router.patch("/{thread_id}", response_model=ChatThreadsResponse)
+async def rename(
+        thread_id: str,
+        request: ChatThreadsCreate,
+        user_id: Annotated[int, Header(alias="x-user-id")],
+        service: ChatThreadsService = Depends(get_service),
+) -> ChatThreadsResponse:
+    """重命名会话"""
+    return await service.rename(user_id = user_id,id=thread_id, title=request.title)
