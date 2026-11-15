@@ -32,3 +32,7 @@ class ChatThreadRepository:
             .where(ChatThreads.user_id == user_id, ChatThreads.id == id)
         )
         return result
+
+    # 删除会话
+    async  def delete(self, thread: ChatThreads) -> None:
+        await self.session.delete(thread)

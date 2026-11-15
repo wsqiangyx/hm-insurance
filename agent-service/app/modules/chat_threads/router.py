@@ -1,6 +1,6 @@
 from typing import Annotated
 
-from fastapi import Depends, APIRouter
+from fastapi import Depends, APIRouter,status,Response
 from fastapi.params import Header
 from sqlalchemy.ext.asyncio import AsyncSession
 from .service import ChatThreadsService
@@ -41,3 +41,14 @@ async def rename(
 ) -> ChatThreadsResponse:
     """重命名会话"""
     return await service.rename(user_id = user_id,id=thread_id, title=request.title)
+
+@router.delete("/{thread_id}", status_code=status.HTTP_204_NO_CONTENT)
+async def delete(
+        thread_id: UUID,
+        user_id: Annotated[int, Header(alias="x-user-id")],
+        service: ChatThreadsService = Depends(get_service),
+) -> Response:
+    """ 删除指定会话 """
+
+    await service.delete(user_id = user_id,thread_id=thread_id)
+    return Response(status_code=status.HTTP_204_NO_CONTENT)

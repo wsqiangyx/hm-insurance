@@ -38,3 +38,10 @@ class ChatThreadsService():
             await self.session.refresh(result)
             return result
 
+    # 删除会话
+    async def delete(self, thread_id: UUID, user_id: int) -> None:
+        async with self.session.begin():
+            thread = await self.repository.required_owner(id=thread_id, user_id=user_id)
+            if not thread:
+                raise ChatThreadNotFound()
+            await self.session.delete(thread)
