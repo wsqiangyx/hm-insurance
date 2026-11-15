@@ -34,15 +34,15 @@ app = FastAPI(
 )
 
 # 统一异常处理
-from app.modules.chat_threads.exceptions import ChatThreadNotFound
-@app.exception_handler(ChatThreadNotFound)
-def handle_exception(request: Request, exc: Exception):
+from app.core.exceptions import ApplicationError
+@app.exception_handler(ApplicationError)
+def handle_exception(request: Request, exc: ApplicationError):
     logger.error(f"处理异常，请求路径：{request.url}，异常消息：{exc}")
     return JSONResponse(
-        status_code= 400, # http状态码
+        status_code= exc.status_code, # http状态码
         content={
-            "code": "CHAT_THREAD_NOT_FOUND",    # 错误码
-            "message": "会话不存在或者不属于当前用户" # 错误消息
+            "code": exc.code,       # 错误码
+            "message": exc.message  # 错误消息
         }
     )
 
