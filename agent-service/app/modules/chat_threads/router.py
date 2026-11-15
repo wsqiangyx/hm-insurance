@@ -24,3 +24,10 @@ async def create_chat_thread(
 ) -> ChatThreadsResponse:
     # 2、执行查询
     return await service.add(user_id = user_id, title=request.title,)
+
+@router.get("", response_model=list[ChatThreadsResponse])
+async def list_by_user(
+        user_id: Annotated[int, Header(alias="x-user-id")],
+        service: ChatThreadsService = Depends(get_service),
+) -> list[ChatThreadsResponse]:
+    return await service.list_by_user(user_id = user_id)

@@ -16,3 +16,7 @@ class ChatThreadsService():
             # 新增对象，插入一条数据
             await self.repository.add(chat_thread)
             return chat_thread
+
+    async def list_by_user(self, user_id: int) -> list[ChatThreads]:
+        result = await self.repository.list_by_user(user_id)
+        return result
