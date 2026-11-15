@@ -7,7 +7,7 @@ from app.core.config import settings
 from app.core.logging import get_logger
 
 logger = get_logger(__name__)
-# 1、数据困链接地址
+# 1、数据库链接地址
 if not settings.db or not settings.db.url:
     raise RuntimeError("db.url 未配置，初始化数据库失败")
 DATABASE_URL = settings.db.url

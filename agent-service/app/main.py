@@ -1,3 +1,4 @@
+import sys
 from contextlib import asynccontextmanager
 
 import uvicorn
@@ -17,13 +18,17 @@ logger = get_logger(__name__)
 async def lifespan(app: FastAPI):
     logger.info("项目启动中，正在初始化。。。")
     from app.infra.database import check_database, close_database
+    from app.infra.checkpointer import init_checkpointer, close_checkpointer
     try:
         # 1、导入数据库管理函数，完成初始化
         await check_database()
+        await init_checkpointer()
         yield
     finally:
         # 关闭
+        logger.info("应用关闭中...")
         await close_database()
+        await close_checkpointer()
 
 
 # 初始化FastAPI
@@ -63,5 +68,7 @@ if __name__ == "__main__":
         "app.main:app",
         host=settings.app.host,
         port=settings.app.port,
-        reload=False
+        reload=False,
+        # 解决windows环境启动时数据库连接报错的问题
+        loop="asyncio:SelectorEventLoop" if sys.platform == "win32" else "auto",
     )

@@ -33,21 +33,31 @@ class DatabaseSettings(EnvSettings):
     max_overflow: int = Field(alias="DB_MAX_OVERFLOW", default=10)
     pool_recycle: int = Field(alias="DB_POOL_RECYCLE", default=1800)
 
-    @computed_field
-    @property
-    def url(self) -> str:
+    def build_url(self, scheme: str):
         # 自动拼接URL路径
         return PostgresDsn.build(
-            scheme="postgresql+asyncpg",
+            scheme=scheme,
             host=self.host,
             port=self.port,
             username=self.user,
             password=self.password
         ).encoded_string()
 
+    @computed_field
+    @property
+    def url(self) -> str:
+        # 自动拼接URL路径
+        return self.build_url(scheme="postgresql+asyncpg")
+
+    @computed_field
+    @property
+    def checkpointer_url(self) -> str:
+        # 自动拼接URL路径
+        return self.build_url(scheme="postgresql")
+
 class LLMSettings(EnvSettings):
     """模型相关配置"""
-    api_key: str = Field(alias="DEEPSEEK_API_KEY")
+    api_key: str = Field(alias="CHAT_API_KEY")
     chat_model: str = Field(alias="CHAT_MODEL")
     base_url: str = Field(alias="BASE_URL")
 
