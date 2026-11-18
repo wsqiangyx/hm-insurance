@@ -1,6 +1,6 @@
 from typing import Annotated
 
-from fastapi import Depends, APIRouter,status,Response
+from fastapi import Depends, APIRouter,status,Response, Request
 from fastapi.params import Header
 from sqlalchemy.ext.asyncio import AsyncSession
 from .service import ChatThreadsService
@@ -12,8 +12,11 @@ router = APIRouter(
     tags=["会话管理的接口"],
 )
 
-def get_service(session: AsyncSession = Depends(get_session)):
-    service = ChatThreadsService(session)
+def get_service(
+        request: Request,
+        session: AsyncSession = Depends(get_session)
+):
+    service = ChatThreadsService(session, request.app.state.agent)
     yield service
 
 @router.post("", response_model=ChatThreadsResponse)
@@ -52,3 +55,12 @@ async def delete(
 
     await service.delete(user_id = user_id,thread_id=thread_id)
     return Response(status_code=status.HTTP_204_NO_CONTENT)
+
+@router.get("/{thread_id}/messages", response_model=ChatHistoryResponse)
+async def rename(
+        thread_id: str,
+        user_id: Annotated[int, Header(alias="x-user-id")],
+        service: ChatThreadsService = Depends(get_service),
+) -> ChatThreadsResponse:
+    """重命名会话"""
+    return await service.get_chat_history(user_id = user_id,thread_id=thread_id)

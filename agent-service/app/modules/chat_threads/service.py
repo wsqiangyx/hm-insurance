@@ -1,13 +1,19 @@
+from uuid import UUID
+
+from langchain_core.messages import HumanMessage, AIMessage
+from langgraph.graph.state import CompiledStateGraph
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from .repository import ChatThreadRepository
 from .models import ChatThreads
 from .exceptions import ChatThreadNotFound
+from .schemas import ChatMessageResponse, ChatHistoryResponse
 
 class ChatThreadsService():
-    def __init__(self, session: AsyncSession):
+    def __init__(self, session: AsyncSession, agent: CompiledStateGraph):
         self.session: AsyncSession = session
         self.repository = ChatThreadRepository(session)
+        self.agent = agent
 
     async def add(self, user_id: int, title: str) -> ChatThreads:
         # 用上下文管理，卡其事务，运行完成，自动commit，出现异常，自动rollback
@@ -45,3 +51,27 @@ class ChatThreadsService():
             if not thread:
                 raise ChatThreadNotFound()
             await self.session.delete(thread)
+
+    async def get_chat_history(self, user_id: int, thread_id: UUID):
+        # 1、校验当前会话是否属于当前会话
+        result = await self.repository.required_owner(user_id=user_id, id=id)
+        # 结果不存在，抛出自定义异常
+        if not result:
+            raise ChatThreadNotFound()
+        # 2、查询当前会话历史
+        state_snapshot = await self.agent.aget_state(config={"configurable":{"thread_id": thread_id}})
+
+        # 3、封装历史消息返回给前端
+        messages = []
+        for message in state_snapshot.values.get("messages", []):
+            # 判断类型，决定role
+            if isinstance(message, HumanMessage):
+                role = "user"
+            elif isinstance(message, AIMessage):
+                role = "assistant"
+            else:
+                continue
+            if message.content:
+                messages.append(ChatMessageResponse(role=role, content=message.text))
+
+        return ChatHistoryResponse(thread_id=thread_id, messages=messages)
