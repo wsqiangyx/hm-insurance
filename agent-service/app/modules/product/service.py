@@ -28,5 +28,4 @@ class ProductService:
                 limit=limit_per_category
             )
             candidate_products.extend(products)
-
         return candidate_products

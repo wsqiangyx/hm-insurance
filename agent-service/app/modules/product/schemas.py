@@ -1,10 +1,10 @@
 # 产品查询约束
 from decimal import Decimal
 
-from pydantic import BaseModel
+from app.common.schemas import BaseSchema
 
 
-class ProductResponse(BaseModel):
+class ProductResponse(BaseSchema):
     """保险产品相应结果"""
 
     id: int
