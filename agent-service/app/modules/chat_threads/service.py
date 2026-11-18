@@ -50,11 +50,14 @@ class ChatThreadsService():
             thread = await self.repository.required_owner(id=thread_id, user_id=user_id)
             if not thread:
                 raise ChatThreadNotFound()
+            # 在刪除会话之前，需要删除会话的历史消息（State的所有快照）
+            await self.agent.checkpointer.adelete_thread(thread_id=thread_id)
+            # 删除会话
             await self.session.delete(thread)
 
     async def get_chat_history(self, user_id: int, thread_id: UUID):
         # 1、校验当前会话是否属于当前会话
-        result = await self.repository.required_owner(user_id=user_id, id=id)
+        result = await self.repository.required_owner(user_id=user_id, id=thread_id)
         # 结果不存在，抛出自定义异常
         if not result:
             raise ChatThreadNotFound()

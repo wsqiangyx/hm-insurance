@@ -1,3 +1,5 @@
+from uuid import UUID
+
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 from .models import ChatThreads
@@ -25,7 +27,7 @@ class ChatThreadRepository:
         return result.all()
 
     # 重命名会话
-    async def required_owner(self, user_id:int, id: str) -> ChatThreads:
+    async def required_owner(self, user_id:int, id: UUID) -> ChatThreads:
         """ 校验指定会话是否属于指定用户 """
         result = await self.session.scalar(
             select(ChatThreads)
