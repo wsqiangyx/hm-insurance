@@ -9,7 +9,8 @@ APP_ROOT = Path(__file__).resolve().parents[2]
 class EnvSettings(BaseSettings):
     """公共settings，配置.env文件位置"""
     model_config = SettingsConfigDict(
-        env_file=(APP_ROOT / ".env",),
+        # .env 提交到仓库；.env.local 存放本地私密值（已被 .gitignore 忽略），后者覆盖前者
+        env_file=(APP_ROOT / ".env", APP_ROOT / ".env.local"),
         env_file_encoding="utf-8",
         extra="ignore",  # settings中未定义的字段被忽略
     )
@@ -65,11 +66,17 @@ class LoggingSettings(EnvSettings):
     """日志相关配置"""
     level: str = Field(alias="LOGGING_LEVEL", default="INFO") # 可选值：DEBUG、INFO、WARNING、ERROR、CRITICAL
 
+class RAGSettings(EnvSettings):
+    """RAG相关配置"""
+
+    mineru_token: str = Field(alias="MINERU_TOKEN")
+
 class Settings(BaseSettings):
     app: AppSettings = Field(default_factory=AppSettings)
     db: DatabaseSettings = Field(default_factory=DatabaseSettings)
     llm: LLMSettings = Field(default_factory=LLMSettings)
     logging: LoggingSettings = Field(default_factory=LoggingSettings)
+    rag: RAGSettings = Field(default_factory=RAGSettings)
 
 # 项目启动直接初始化
 settings = Settings()
